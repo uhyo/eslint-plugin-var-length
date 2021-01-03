@@ -132,6 +132,9 @@ describe("VariableDeclaration", () => {
           return aa + bb + cc;
         }`,
       },
+      {
+        code: `let a = 123;`,
+      },
     ],
     invalid: [
       {
@@ -175,18 +178,30 @@ describe("VariableDeclaration", () => {
         ],
       },
       {
-        code: `function ffffffff() {
-          {
-            var a;
-            let aa;
-            1;
-          }
-        }`,
+        code: `let a = 123,
+        //
+        //
+        //
+        abc = 4;`,
         errors: [
           {
             messageId: "min",
             data: {
               length: 3,
+            },
+          },
+        ],
+      },
+      {
+        code: `for (const i of arr) {
+          console.log(i);
+          i;
+        }`,
+        errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
             },
           },
         ],
