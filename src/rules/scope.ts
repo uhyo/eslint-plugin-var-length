@@ -1,5 +1,10 @@
-import { TSESLint, TSESTree } from "@typescript-eslint/experimental-utils";
+import {
+  AST_NODE_TYPES,
+  TSESLint,
+  TSESTree,
+} from "@typescript-eslint/experimental-utils";
 import memoizeOne from "memoize-one";
+import { isExportDeclartation } from "../utils/export";
 import { getVarScope } from "../utils/scope";
 import {
   getFunctionParameterVariables,
@@ -12,6 +17,8 @@ type MessageId = "min" | "max";
 
 type RuleOptions = {
   lengthCount: "length" | "codePoint" | ((id: string) => number);
+  checkFunctionName?: boolean;
+  checkExportedName?: boolean;
   limit: (
     scopeLocation: ScopeLocation
   ) => number | { min?: number; max?: number };
@@ -45,7 +52,27 @@ const rule: Omit<
       min: "This Variable must have at least {{ length }} characters.",
       max: "This Variable must have at most {{ length }} characters.",
     },
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          checkFunctionName: {
+            type: "boolean",
+          },
+          checkExportedName: {
+            type: "boolean",
+          },
+        },
+        propertyNames: {
+          enum: [
+            "lengthCount",
+            "checkFunctionName",
+            "checkExportedName",
+            "limit",
+          ],
+        },
+      },
+    ],
   },
   create: function (context) {
     const options = context.options[0] || {};
@@ -71,6 +98,10 @@ const rule: Omit<
                 };
           }
         : defaultLimitFunction;
+
+    const checkFunctionName = options.checkFunctionName ?? false;
+    const checkExportedName = options.checkExportedName ?? false;
+
     return {
       FunctionDeclaration: checkFunctionLike,
       FunctionExpression: checkFunctionLike,
@@ -105,6 +136,24 @@ const rule: Omit<
     ) {
       const vars = getFunctionParameterVariables(node);
       const scope = context.getScope();
+      // check function name
+      if (node.type === AST_NODE_TYPES.FunctionDeclaration) {
+        if (
+          checkFunctionName &&
+          (checkExportedName || !isExportDeclartation(node.parent))
+        ) {
+          const funcNameScope = scope.upper;
+          if (funcNameScope && node.id) {
+            checkForScope(
+              context,
+              lengthCountFunction,
+              limitFunction,
+              node.id,
+              funcNameScope
+            );
+          }
+        }
+      }
       for (const v of vars) {
         checkForScope(context, lengthCountFunction, limitFunction, v, scope);
       }

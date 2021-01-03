@@ -4,7 +4,7 @@ import rule from "../rules/scope";
 const ruleName = "scope";
 const tester = new TSESLint.RuleTester({
   parser: require.resolve("espree"),
-  parserOptions: { ecmaVersion: 2020 },
+  parserOptions: { ecmaVersion: 2020, sourceType: "module" },
 });
 
 describe("FunctionDeclaration", () => {
@@ -21,6 +21,15 @@ describe("FunctionDeclaration", () => {
           return bbb;
         }`,
       },
+      {
+        options: [
+          {
+            checkFunctionName: true,
+          },
+        ],
+        code: `function fu() {
+        }`,
+      },
     ],
     invalid: [
       {
@@ -29,6 +38,51 @@ describe("FunctionDeclaration", () => {
           return a2;
         }`,
         errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
+            },
+          },
+        ],
+      },
+      {
+        options: [
+          {
+            checkFunctionName: true,
+          },
+        ],
+        code: `function f() {
+        }
+        export function g() {
+        }`,
+        errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
+            },
+          },
+        ],
+      },
+      {
+        options: [
+          {
+            checkFunctionName: true,
+            checkExportedName: true,
+          },
+        ],
+        code: `function f() {
+        }
+        export function g() {
+        }`,
+        errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
+            },
+          },
           {
             messageId: "min",
             data: {
