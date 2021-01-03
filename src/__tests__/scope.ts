@@ -189,6 +189,10 @@ describe("VariableDeclaration", () => {
       {
         code: `let a = 123;`,
       },
+      {
+        code: `export let a = 0;
+        a += 12345;`,
+      },
     ],
     invalid: [
       {
@@ -251,6 +255,23 @@ describe("VariableDeclaration", () => {
           console.log(i);
           i;
         }`,
+        errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
+            },
+          },
+        ],
+      },
+      {
+        code: `export let a = 0;
+        a += 12345;`,
+        options: [
+          {
+            checkExportedName: true,
+          },
+        ],
         errors: [
           {
             messageId: "min",

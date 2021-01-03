@@ -107,6 +107,9 @@ const rule: Omit<
       FunctionExpression: checkFunctionLike,
       ArrowFunctionExpression: checkFunctionLike,
       VariableDeclaration: (node) => {
+        if (!checkExportedName && isExportDeclartation(node.parent)) {
+          return;
+        }
         const vars = getVariableDeclarationVariables(node);
         const scope = context.getScope();
         const effectiveScope = node.kind === "var" ? getVarScope(scope) : scope;
