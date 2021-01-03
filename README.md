@@ -65,7 +65,7 @@ This rule accepts an object with following properties (all optional):
 By default, the minumum variable length is quadratic to the number of lines in the surrounding scope:
 
 ```js
-minimumLength = factor * Math.ceil(Math.sqrt(linesCount));
+minimumLength = Math.ceil(factor * Math.sqrt(linesCount));
 ```
 
 The `factor` defaults to `0.75`. By passing an object of the form `{ factor: num }` as the `limit` option, you can override the factor. A smaller factor is more permissive.
