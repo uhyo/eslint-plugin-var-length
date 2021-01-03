@@ -17,24 +17,21 @@ type MessageId = "min" | "max";
 
 type RuleOptions = {
   lengthCount: "length" | "codePoint" | ((id: string) => number);
-  checkFunctionName?: boolean;
-  checkExportedName?: boolean;
-  limit: (
-    scopeLocation: ScopeLocation
-  ) => number | { min?: number; max?: number };
+  checkFunctionName: boolean;
+  checkExportedName: boolean;
+  limit: LimitOption;
 };
+
+type LimitOption =
+  | {
+      mode?: "quadratic";
+      factor?: number;
+    }
+  | ((scopeLocation: ScopeLocation) => number | { min?: number; max?: number });
 
 type LimitFunction = (
   scopeLocation: ScopeLocation
 ) => { min: number; max: number };
-
-const defaultLimitFunction: LimitFunction = (scopeLocation: ScopeLocation) => {
-  return {
-    // 1 => 1, 2...4 => 2, 5...9 => 3, ...
-    min: Math.ceil(Math.sqrt(scopeLocation.lineCount)),
-    max: Infinity,
-  };
-};
 
 const rule: Omit<
   TSESLint.RuleModule<MessageId, [Partial<RuleOptions>?]>,
@@ -82,22 +79,7 @@ const rule: Omit<
         : typeof options.lengthCount === "function"
         ? options.lengthCount
         : (str: string) => str.length;
-    const limit = options.limit;
-    const limitFunction: LimitFunction =
-      typeof limit === "function"
-        ? (scopeLocation: ScopeLocation) => {
-            const l = limit(scopeLocation);
-            return typeof l === "number"
-              ? {
-                  min: l,
-                  max: Infinity,
-                }
-              : {
-                  min: l.min ?? 0,
-                  max: l.max ?? Infinity,
-                };
-          }
-        : defaultLimitFunction;
+    const limitFunction = getLimitFunction(options.limit);
 
     const checkFunctionName = options.checkFunctionName ?? false;
     const checkExportedName = options.checkExportedName ?? false;
@@ -165,6 +147,34 @@ const rule: Omit<
 };
 
 export default rule;
+
+function getLimitFunction(limit: LimitOption = {}): LimitFunction {
+  if (typeof limit === "function") {
+    return (scopeLocation: ScopeLocation) => {
+      const result = limit(scopeLocation);
+      return typeof result === "number"
+        ? {
+            min: result,
+            max: Infinity,
+          }
+        : {
+            min: result.min ?? 0,
+            max: result.max ?? Infinity,
+          };
+    };
+  } else if (!limit.mode || limit.mode === "quadratic") {
+    // quadratic
+    const factor = limit.factor || 0.75;
+    return (scopeLocation) => {
+      return {
+        min: Math.ceil(factor * Math.ceil(Math.sqrt(scopeLocation.lineCount))),
+        max: Infinity,
+      };
+    };
+  } else {
+    throw new Error("'limit' option has unknown mode");
+  }
+}
 
 const getScopeLocationMemo = memoizeOne(getScopeLocation);
 
