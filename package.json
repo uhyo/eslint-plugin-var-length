@@ -2,8 +2,10 @@
   "name": "eslint-plugin-var-length",
   "version": "1.0.0",
   "description": "ESLint rules for linting variable length",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts",
     "test": "jest"
   },
   "keywords": [
@@ -22,8 +24,11 @@
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-typescript": "^7.12.7",
     "@types/jest": "^26.0.19",
+    "@typescript-eslint/eslint-plugin": "^4.11.1",
+    "@typescript-eslint/parser": "^4.11.1",
     "babel-jest": "^26.6.3",
     "eslint": "^7.17.0",
+    "eslint-plugin-local-rules": "^1.0.1",
     "espree": "^7.3.1",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
