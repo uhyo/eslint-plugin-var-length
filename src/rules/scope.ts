@@ -178,9 +178,20 @@ function checkForScope(
   const scopeLoc = getScopeLocationMemo(scope.block);
   const idLength = lengthCountFunction(identifier.name);
   const limit = limitFunction(scopeLoc);
+  // exclude type annotation from error location
+  const loc: TSESTree.SourceLocation | undefined = identifier.typeAnnotation
+    ? {
+        start: identifier.loc.start,
+        end: {
+          line: identifier.loc.start.line,
+          column: identifier.loc.start.column + identifier.name.length,
+        },
+      }
+    : undefined;
   if (idLength < limit.min) {
     context.report({
       node: identifier,
+      loc,
       messageId: "min",
       data: {
         length: limit.min,
@@ -189,6 +200,7 @@ function checkForScope(
   } else if (idLength > limit.max) {
     context.report({
       node: identifier,
+      loc,
       messageId: "max",
       data: {
         length: limit.max,
