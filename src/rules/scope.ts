@@ -68,14 +68,22 @@ const rule: Omit<
           }
         : defaultLimitFunction;
     return {
-      FunctionDeclaration: (node: TSESTree.FunctionDeclaration) => {
-        const vars = getFunctionParameterVariables(node);
-        const scope = context.getScope();
-        for (const v of vars) {
-          checkForScope(context, lengthCountFunction, limitFunction, v, scope);
-        }
-      },
+      FunctionDeclaration: checkFunctionLike,
+      FunctionExpression: checkFunctionLike,
+      ArrowFunctionExpression: checkFunctionLike,
     };
+    function checkFunctionLike(
+      node:
+        | TSESTree.FunctionDeclaration
+        | TSESTree.FunctionExpression
+        | TSESTree.ArrowFunctionExpression
+    ) {
+      const vars = getFunctionParameterVariables(node);
+      const scope = context.getScope();
+      for (const v of vars) {
+        checkForScope(context, lengthCountFunction, limitFunction, v, scope);
+      }
+    }
   },
 };
 

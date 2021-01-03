@@ -4,7 +4,10 @@ import {
 } from "@typescript-eslint/experimental-utils";
 
 export function getFunctionParameterVariables(
-  decl: TSESTree.FunctionDeclaration | TSESTree.FunctionExpression
+  decl:
+    | TSESTree.FunctionDeclaration
+    | TSESTree.FunctionExpression
+    | TSESTree.ArrowFunctionExpression
 ): TSESTree.Identifier[] {
   return decl.params.flatMap(getPatternVariables);
 }
