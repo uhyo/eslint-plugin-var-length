@@ -20,7 +20,9 @@ export function getVariableDeclarationVariables(
   });
 }
 
-function getPatternVariables(pat: TSESTree.Node | null): TSESTree.Identifier[] {
+export function getPatternVariables(
+  pat: TSESTree.Node | null
+): TSESTree.Identifier[] {
   if (pat === null) {
     return [];
   }

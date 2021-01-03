@@ -194,3 +194,33 @@ describe("VariableDeclaration", () => {
     ],
   });
 });
+
+describe("CatchClause", () => {
+  tester.run(ruleName, rule, {
+    valid: [
+      {
+        code: `try {}
+        catch ({ e }) {
+          console.error(e);
+        }`,
+      },
+    ],
+    invalid: [
+      {
+        code: `try {}
+        catch ({ e, ee }) {
+          console.error(e);
+          console.error(ee);
+        }`,
+        errors: [
+          {
+            messageId: "min",
+            data: {
+              length: 2,
+            },
+          },
+        ],
+      },
+    ],
+  });
+});

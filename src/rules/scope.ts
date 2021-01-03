@@ -3,6 +3,7 @@ import memoizeOne from "memoize-one";
 import { getVarScope } from "../utils/scope";
 import {
   getFunctionParameterVariables,
+  getPatternVariables,
   getVariableDeclarationVariables,
 } from "../utils/variables";
 import { getScopeLocation, ScopeLocation } from "./block";
@@ -86,6 +87,13 @@ const rule: Omit<
             v,
             effectiveScope
           );
+        }
+      },
+      CatchClause: (node) => {
+        const vars = getPatternVariables(node.param);
+        const scope = context.getScope();
+        for (const v of vars) {
+          checkForScope(context, lengthCountFunction, limitFunction, v, scope);
         }
       },
     };
