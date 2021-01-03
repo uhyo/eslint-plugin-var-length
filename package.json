@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "ESLint rules for linting variable length",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
