@@ -33,7 +33,7 @@ type LimitFunction = (
   scopeLocation: ScopeLocation
 ) => { min: number; max: number };
 
-const rule: Omit<
+const varLengthScopeRule: Omit<
   TSESLint.RuleModule<MessageId, [Partial<RuleOptions>?]>,
   "docs"
 > = {
@@ -95,12 +95,12 @@ const rule: Omit<
         const vars = getVariableDeclarationVariables(node);
         const scope = context.getScope();
         const effectiveScope = node.kind === "var" ? getVarScope(scope) : scope;
-        for (const v of vars) {
+        for (const checkedVar of vars) {
           checkForScope(
             context,
             lengthCountFunction,
             limitFunction,
-            v,
+            checkedVar,
             effectiveScope
           );
         }
@@ -146,7 +146,7 @@ const rule: Omit<
   },
 };
 
-export default rule;
+export default varLengthScopeRule;
 
 function getLimitFunction(limit: LimitOption = {}): LimitFunction {
   if (typeof limit === "function") {
@@ -189,7 +189,9 @@ function checkForScope(
   const idLength = lengthCountFunction(identifier.name);
   const limit = limitFunction(scopeLoc);
   // exclude type annotation from error location
-  const loc: TSESTree.SourceLocation | undefined = identifier.typeAnnotation
+  const reportLoc:
+    | TSESTree.SourceLocation
+    | undefined = identifier.typeAnnotation
     ? {
         start: identifier.loc.start,
         end: {
@@ -201,7 +203,7 @@ function checkForScope(
   if (idLength < limit.min) {
     context.report({
       node: identifier,
-      loc,
+      loc: reportLoc,
       messageId: "min",
       data: {
         length: limit.min,
@@ -210,7 +212,7 @@ function checkForScope(
   } else if (idLength > limit.max) {
     context.report({
       node: identifier,
-      loc,
+      loc: reportLoc,
       messageId: "max",
       data: {
         length: limit.max,

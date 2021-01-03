@@ -21,32 +21,32 @@ export function getVariableDeclarationVariables(
 }
 
 export function getPatternVariables(
-  pat: TSESTree.Node | null
+  pattern: TSESTree.Node | null
 ): TSESTree.Identifier[] {
-  if (pat === null) {
+  if (pattern === null) {
     return [];
   }
-  switch (pat.type) {
+  switch (pattern.type) {
     case AST_NODE_TYPES.ArrayPattern: {
-      return pat.elements.flatMap(getPatternVariables);
+      return pattern.elements.flatMap(getPatternVariables);
     }
     case AST_NODE_TYPES.ObjectPattern: {
-      return pat.properties.flatMap(getPatternVariables);
+      return pattern.properties.flatMap(getPatternVariables);
     }
     case AST_NODE_TYPES.Identifier: {
-      return [pat];
+      return [pattern];
     }
     case AST_NODE_TYPES.AssignmentPattern: {
-      return getPatternVariables(pat.left);
+      return getPatternVariables(pattern.left);
     }
     case AST_NODE_TYPES.Property: {
-      return getPatternVariables(pat.value);
+      return getPatternVariables(pattern.value);
     }
     case AST_NODE_TYPES.RestElement: {
-      return getPatternVariables(pat.argument);
+      return getPatternVariables(pattern.argument);
     }
     case AST_NODE_TYPES.TSParameterProperty: {
-      return getPatternVariables(pat.parameter);
+      return getPatternVariables(pattern.parameter);
     }
     default: {
       return [];

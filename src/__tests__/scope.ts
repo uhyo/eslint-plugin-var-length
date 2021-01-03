@@ -1,5 +1,6 @@
+/* eslint-disable local-rules/scope */
 import { TSESLint } from "@typescript-eslint/experimental-utils";
-import rule from "../rules/scope";
+import varLengthScopeRule from "../rules/scope";
 
 const ruleName = "scope";
 const tester = new TSESLint.RuleTester({
@@ -8,7 +9,7 @@ const tester = new TSESLint.RuleTester({
 });
 
 describe("FunctionDeclaration", () => {
-  tester.run(ruleName, rule, {
+  tester.run(ruleName, varLengthScopeRule, {
     valid: [
       {
         code: `function func(a) {
@@ -96,7 +97,7 @@ describe("FunctionDeclaration", () => {
 });
 
 describe("FunctionExpression", () => {
-  tester.run(ruleName, rule, {
+  tester.run(ruleName, varLengthScopeRule, {
     valid: [
       {
         code: `(function(a) {
@@ -133,7 +134,7 @@ describe("FunctionExpression", () => {
 });
 
 describe("ArrowFunctionExpression", () => {
-  tester.run(ruleName, rule, {
+  tester.run(ruleName, varLengthScopeRule, {
     valid: [
       {
         code: `((a)=> {
@@ -167,7 +168,7 @@ describe("ArrowFunctionExpression", () => {
 });
 
 describe("VariableDeclaration", () => {
-  tester.run(ruleName, rule, {
+  tester.run(ruleName, varLengthScopeRule, {
     valid: [
       {
         code: `function ffffffff() {
@@ -286,7 +287,7 @@ describe("VariableDeclaration", () => {
 });
 
 describe("CatchClause", () => {
-  tester.run(ruleName, rule, {
+  tester.run(ruleName, varLengthScopeRule, {
     valid: [
       {
         code: `try {}
