@@ -1,7 +1,10 @@
 import { TSESLint, TSESTree } from "@typescript-eslint/experimental-utils";
-import { Scope } from "@typescript-eslint/experimental-utils/dist/ts-eslint";
 import memoizeOne from "memoize-one";
-import { getFunctionParameterVariables } from "../utils/variables";
+import { getVarScope } from "../utils/scope";
+import {
+  getFunctionParameterVariables,
+  getVariableDeclarationVariables,
+} from "../utils/variables";
 import { getScopeLocation, ScopeLocation } from "./block";
 
 type MessageId = "min" | "max";
@@ -71,6 +74,20 @@ const rule: Omit<
       FunctionDeclaration: checkFunctionLike,
       FunctionExpression: checkFunctionLike,
       ArrowFunctionExpression: checkFunctionLike,
+      VariableDeclaration: (node) => {
+        const vars = getVariableDeclarationVariables(node);
+        const scope = context.getScope();
+        const effectiveScope = node.kind === "var" ? getVarScope(scope) : scope;
+        for (const v of vars) {
+          checkForScope(
+            context,
+            lengthCountFunction,
+            limitFunction,
+            v,
+            effectiveScope
+          );
+        }
+      },
     };
     function checkFunctionLike(
       node:
@@ -96,7 +113,7 @@ function checkForScope(
   lengthCountFunction: (str: string) => number,
   limitFunction: LimitFunction,
   identifier: TSESTree.Identifier,
-  scope: Scope.Scope
+  scope: TSESLint.Scope.Scope
 ) {
   const scopeLoc = getScopeLocationMemo(scope.block);
   const idLength = lengthCountFunction(identifier.name);

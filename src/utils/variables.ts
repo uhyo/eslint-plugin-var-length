@@ -12,20 +12,15 @@ export function getFunctionParameterVariables(
   return decl.params.flatMap(getPatternVariables);
 }
 
-function getPatternVariables(
-  pat:
-    | TSESTree.ArrayPattern
-    | TSESTree.ObjectPattern
-    | TSESTree.Identifier
-    | TSESTree.AssignmentPattern
-    | TSESTree.MemberExpressionComputedName
-    | TSESTree.MemberExpressionNonComputedName
-    | TSESTree.PropertyComputedName
-    | TSESTree.PropertyNonComputedName
-    | TSESTree.RestElement
-    | TSESTree.TSParameterProperty
-    | null
+export function getVariableDeclarationVariables(
+  decl: TSESTree.VariableDeclaration
 ): TSESTree.Identifier[] {
+  return decl.declarations.flatMap((declarator) => {
+    return getPatternVariables(declarator.id);
+  });
+}
+
+function getPatternVariables(pat: TSESTree.Node | null): TSESTree.Identifier[] {
   if (pat === null) {
     return [];
   }
@@ -42,17 +37,17 @@ function getPatternVariables(
     case AST_NODE_TYPES.AssignmentPattern: {
       return getPatternVariables(pat.left);
     }
-    case AST_NODE_TYPES.MemberExpression: {
-      return [];
-    }
     case AST_NODE_TYPES.Property: {
-      return [];
+      return getPatternVariables(pat.value);
     }
     case AST_NODE_TYPES.RestElement: {
       return getPatternVariables(pat.argument);
     }
     case AST_NODE_TYPES.TSParameterProperty: {
       return getPatternVariables(pat.parameter);
+    }
+    default: {
+      return [];
     }
   }
 }
